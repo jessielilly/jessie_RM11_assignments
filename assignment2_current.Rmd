@@ -24,20 +24,19 @@ return(data.frame(response=response,predictor=predictor))}
 ## Use the data from gen.mod to generate parameter estimates for 2 different B1
 
 ```{r}
-n.times <- 1000
+n.times <- 1:1000
 n <- c(10,15,20)
 b1 <- c(2,3,4)
 sd.err <- c(1,2,3)
 
 
-est.df <- expand.grid(n.times,n=n,b1=b1,sd.err=sd.err)
+est.df <- expand.grid(n.times=n.times,b1=b1,sd.err=sd.err)
 
-for(i in 1:length(est.df$n.times)){tmp.df<-gen.mod(n=est.df$n[i],b0=4,b1=est.df$b1[i],est.df$sd.err[i])
-est.lm <-lm(response ~predictor,data=gen.mod)
-est.df$param[i] <- summary(est.lm)$coefficients["predictor","t value"
-]
-
-
+for(i in 1:length(est.df$n.times))
+{tmp.df<-gen.mod(n=est.df $ n[i], b0=4, b1=est.df$b1[i], est.df$sd.err[i])
+est.lm <-lm(response ~ predictor,data=tmp.df)
+est.df$param[i] <- summary(est.lm)$coefficients["predictor","t value"]
+}
 
 ```
 
