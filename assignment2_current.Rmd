@@ -100,7 +100,7 @@ est.df <- data.frame(est.df)
 
 ```
 
-## Splot est.df into long format and group by individual trials. 
+## Plot est.df into long format and group by individual trials. 
 
 ```{r}
 est.df <- gather(est.df,value="est",key="trial")
@@ -112,4 +112,38 @@ p <- ggplot(aes(est,group=trial,col=trial),data=est.df)
 p+geom_density()+geom_vline(data=est.sum.df,aes(xintercept=mn.est,col=trial))
 ```
 
-## Show results visually 
+## Do the same thing as above, but use a single parameter estimate of B1=0 (e.g. No effect). Set B0=0. Use a sample size of 100. Instead of using the t value as your quality estimate, have the function output the 'p value'. 
+
+
+```{r}
+est.df.2 <- function(n=100, b0=0,b1=0,sd.err=1){
+  predictor <- runif(n)-0.5
+  response <- b0+b1 * predictor+rnorm(n,mean=0,sd=sd.err)
+  return(data.frame(response=response,predictor=predictor))
+}
+n.times <- 1:100
+n <- c(10,15,20)
+b1 <- c(0)
+sd.err <- c(1,2,3,4)
+
+
+est <- NULL
+for (i in 1:3){
+  a <- n[i]
+  for(i in 1) {
+    b <- b1[i]
+      for(i in 1:4) {
+        c<-sd.err[i]}}}
+
+for(i in 1:100){
+  m1<- lm(response~predictor,data=gen.mod(n=a,b0=0,b1=b,sd.err=c))
+  est[i] <- summary(m1)$coefficients["predictor","Estimate"]
+  }
+
+est.df <- data.frame(est.df)
+
+```
+
+```{r}
+```
+
