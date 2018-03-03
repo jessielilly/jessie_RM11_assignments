@@ -77,17 +77,39 @@ p+geom_density()+geom_vline(data=est.sum.df,aes(xintercept=mn.est,col=trial))
 ```{r}
 n.times <- 100
 n <- c(10,15,20)
-b1 <- c(2,3,5)
-sd.err <- c(1,2,3)
+b1 <- c(2,3,5,7)
+sd.err <- c(1,2,3,4)
 
 
-n.times <- 100
-est.df <- matrix(nrow=n.times, ncol=3,NA)
+est <- NULL
+for (i in 1:3){
+  a <- n[i]
+  for(i in 1:4) {
+    b <- b1[i]
+      for(i in 1:4) {
+        c<-sd.err[i]}}}
 
-for(i in 1:n.times) {m1[i]<-lm(response ~ predictor,data= gen.mod(n[i],b0=4,b1[i],sd.err[i]))
-est.df[i,3] <- summary(m1)$coefficients["predictor","Estimate"]}
+for(i in 1:100){
+  m1<- lm(response~predictor,data=gen.mod(n=a,b0=4,b1=b,sd.err=c))
+  est[i] <- summary(m1)$coefficients["predictor","Estimate"]
+  }
+
+est.df <- data.frame(est.df)
 
 
 
 ```
 
+## Splot est.df into long format and group by individual trials. 
+
+```{r}
+est.df <- gather(est.df,value="est",key="trial")
+est.df$trial <- factor(est.df$trial)
+
+est.sum.df <- group_by(est.df,trial) %>% summarize(mn.est=mean(est))
+
+p <- ggplot(aes(est,group=trial,col=trial),data=est.df)
+p+geom_density()+geom_vline(data=est.sum.df,aes(xintercept=mn.est,col=trial))
+```
+
+## Show results visually 
