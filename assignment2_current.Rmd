@@ -82,15 +82,20 @@ n <- c(10,15,20,25)
 b1 <- c(0.2,0.5,0.8,1)
 sd.err <- c(0.5,1,1.5,2)
 
-est<- NULL ## an empty vector
+## pdt -- you actually want an empty data frame
+est.df<- NULL ## an empty vector
+
+## pdt: in here, you need to think a bit more about what you want est.df
+## to look like. You are varying several different inputs into the 
+## model, and so you want to track those somehow ... 
 
 for(i in 1:4) {
   a <- n[i]
   for(k in 1:4) {
     b <- b1[k]
-    for(z in 1:4) { c<- sd.err[z]
+    for(z in 1:4) { c <- sd.err[z]
       for(j in 1:100){
-           m1<- lm(response ~ predictor,data=gen.mod(n[i],b0=1,b1[k],sd.err[z]))
+           m1 <- lm(response ~ predictor, data=gen.mod(n[i],b0=1,b1[k],sd.err[z]))
            est.df[j,4]<-summary(m1)$coefficients["predictor","Estimate"]}}}}
 
 est.df <- data.frame(est.df)
