@@ -131,6 +131,14 @@ p+geom_density()+geom_vline(data=est.sum.df,aes(xintercept=mn.est,col=trial))
 
 
 ```{r}
+
+gen.df2 <- function(n=100,b0=0,b1=0,sd.err=1){
+  predictor <- runif(n)-0.5
+  response <- b0+b1 * predictor+rnorm(n,mean=0,sd=sd.err)
+}
+
+
+
 n.times <- 100
 n <- c(10,15,20,25)
 b1 <- c(0)
@@ -138,21 +146,21 @@ sd.err <- c(0.5,1,1.5,2)
 
 test.df2 <- expand.grid(n.times=n.times,n=n,b1=b1,sd.err=sd.err)
 
-for(i in 1:4) {
-  a <- n[i]
-  for(k in 1) {
-    b <- b1[k]
-    for(z in 1:4) { c<- sd.err[z]
-      for(j in 1:100){
-           m1<- lm(response ~ predictor,data=gen.mod(n[i],b0=0,b1[k],sd.err[z]))
-           est.df[j,4]<-summary(m1)$coefficients["predictor","Pr(>|t|"]}}}}
+for(i in 1:length(test.df$n.times)){
+  tmp.df <- gen.df(n=test.df$n[i],b0=0,b1=test.df2$b1[i],sd.err=test.df2$sd.err[i])
+  temp.lm2<- lm(response~predictor,data=tempdf2)
+  test.df2$pval[i] <- summary(tmp.lm2)$coefficients["predictor","Pr(>|t|"]
+}
+
+
 
 
 
 ```
-##
+## For a given sample size and error,what does the distribution of the p-value look like?
 ```{r}
+p2<- ggplot(data=test.df2,aes(pval,group=n,col=n))
+p2 + geom_density()+facet_grid(~sd.err)
 
-I am not sure how to find what proportion of p-values are <=0.05
 ```
 
