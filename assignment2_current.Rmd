@@ -78,22 +78,27 @@ p+geom_density()+geom_vline(data=est.sum.df,aes(xintercept=mn.est,col=trial))
 
 ```{r}
 n.times <- 100
-n <- c(10,15,20)
+n <- c(10,15,20,25)
 b1 <- c(0.2,0.5,0.8,1)
 sd.err <- c(0.5,1,1.5,2)
 
 est<- NULL ## an empty vector
 
-for(i in 1:3) {
+for(i in 1:4) {
   a <- n[i]
   for(k in 1:4) {
     b <- b1[k]
     for(z in 1:4) { c<- sd.err[z]
       for(j in 1:100){
            m1<- lm(response ~ predictor,data=gen.mod(n[i],b0=1,b1[k],sd.err[z]))
-           est.df[j,3]<-summary(m1)$coefficients["predictor","Estimate"]}}}}
+           est.df[j,4]<-summary(m1)$coefficients["predictor","Estimate"]}}}}
 
-est.df <- gather(est.df,value="est",keys="trial")
+est.df <- data.frame(est.df)
+
+##split est.df into a data frame in long format
+
+est.df <- gather(est.df,value="est",key="trial")
+
 est.df$trial <- factor(est.df$trial)
 
 est.sum.df <- group_by(est.df,trial) %>% summarize(mn.est = mean(est))
@@ -122,36 +127,32 @@ p+geom_density()+geom_vline(data=est.sum.df,aes(xintercept=mn.est,col=trial))
 
 ## Do the same thing as above, but use a single parameter estimate of B1=0 (e.g. No effect). Set B0=0. Use a sample size of 100. Instead of using the t value as your quality estimate, have the function output the 'p value'. 
 
+##What does exapnd.grid do?
+
 
 ```{r}
-est.df.2 <- function(n=100, b0=0,b1=0,sd.err=1){
-  predictor <- runif(n)-0.5
-  response <- b0+b1 * predictor+rnorm(n,mean=0,sd=sd.err)
-  return(data.frame(response=response,predictor=predictor))
-}
-n.times <- 1:100
-n <- c(10,15,20)
+n.times <- 100
+n <- c(10,15,20,25)
 b1 <- c(0)
-sd.err <- c(1,2,3,4)
+sd.err <- c(0.5,1,1.5,2)
 
+test.df2 <- expand.grid(n.times=n.times,n=n,b1=b1,sd.err=sd.err)
 
-est <- NULL
-for (i in 1:3){
+for(i in 1:4) {
   a <- n[i]
-  for(i in 1) {
-    b <- b1[i]
-      for(i in 1:4) {
-        c<-sd.err[i]}}}
+  for(k in 1) {
+    b <- b1[k]
+    for(z in 1:4) { c<- sd.err[z]
+      for(j in 1:100){
+           m1<- lm(response ~ predictor,data=gen.mod(n[i],b0=0,b1[k],sd.err[z]))
+           est.df[j,4]<-summary(m1)$coefficients["predictor","Pr(>|t|"]}}}}
 
-for(i in 1:100){
-  m1<- lm(response~predictor,data=gen.mod(n=a,b0=0,b1=b,sd.err=c))
-  est[i] <- summary(m1)$coefficients["predictor","Pr(>|t|"]
-  }
 
-est.df <- data.frame(est.df)
 
 ```
-
+##
 ```{r}
+
+I am not sure how to find what proportion of p-values are <=0.05
 ```
 
