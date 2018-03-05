@@ -157,10 +157,18 @@ for(i in 1:length(test.df$n.times)){
 
 
 ```
-## For a given sample size and error,what does the distribution of the p-value look like?
+## 4.a. For a given sample size and error,what does the distribution of the p-value look like?
 ```{r}
 p2<- ggplot(data=test.df2,aes(pval,group=n,col=n))
 p2 + geom_density()+facet_grid(~sd.err)
+
+```
+## 4.b What proportion of p values are <=0.05?
+```{r}
+pvalues <- which(test.df2$pval <=0.05)
+tabulate(pvalues)
+```
+```{r}
 
 ```
 
