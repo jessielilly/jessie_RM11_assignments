@@ -1,0 +1,98 @@
+---
+title: "assignment2_attempt2"
+author: "Jessie Lilly"
+date: "March 5, 2018"
+output: html_document
+---
+
+
+
+##load tidyverse
+
+```{r}
+library(tidyverse)
+```
+
+## Develop a function(based on the above) that will generate, for a range of each magnitude of B1, sample size and error, a measure of the quality of the parameter estimate(t-value)
+
+```{r}
+gen.mod <- function(n=100, b0=2, b1=3, sd.err=1){predictor<-runif(n)-0.5
+response <- b0+b1*predictor+rnorm(n, mean= 0,sd= sd.err)
+return(data.frame(response = response, predictor = predictor))}
+```
+
+```{r}
+n.times <- 100
+n <- c(10,15,20)
+b1 <- c(0.2,0.5,0.8)
+sd.err <- c(0.5,1.6,2.5)
+
+test.df <- expand.grid(n.times=n.times,n=n,b1=b1,sd.err=sd.err)
+```
+```{r}
+```
+
+## 2. Use that function to produce a data frame, with various combinations of each of the three variables as 'factor' and the quality of the estimate of the response. 
+
+```{r}
+for (i in 1:length(test.df$n.times)){
+  tmp.df <- gen.mod(n=test.df$n[i],b0=2,b1=test.df$b1[i],sd.err=test.df$sd.err[i])
+  tmp.lm <- lm(response ~predictor,data=tmp.df)
+  test.df$tval[i] <- summary(tmp.lm)$coefficients["predictor","t value"]}
+```
+
+## 3. Show the results visually. 
+
+```{r}
+p <- ggplot(data=test.df,aes(tval,group=b1,col=b1))
+p + geom_density()+ xlab("t value")+ ylab("Density")
+```
+
+## 4. Do the same thing above but use a single parameter estimate of B1=0 and set B0=0. Use a sample size of 100. Instead of using the "t" value as your quality estimate have the function output the p value. 
+
+```{r}
+n.times <- 1:100
+n <- c(10,15,20)
+b1 <- c(0)
+sd.err <- c(0.5,1.6,2.5)
+
+gen.df2 <- function(n=100,b0=0,b1=0,sd.err=1){
+  predictor<- runif(n)-0.5
+  response <- b0 + b1*predictor+rnorm(n,mean=0,sd=sd.err)
+  return(data.frame(response=response,predictor=predictor))
+}
+
+test.df2 <- expand.grid(n.times=n.times,n=n,b1=b1,sd.err=sd.err)
+
+for (i in 1:length(test.df2$n.times)) {
+    tmp.df2 <- gen.df2(n = test.df2$n[i], b0 = 0, b1 = test.df2$b1[i], sd.err = test.df2$sd.err[i])
+    tmp.lm2 <- lm(response ~ predictor, data = tmp.df2)
+    test.df2$pval[i] <- summary(tmp.lm2)$coefficients["predictor", "Pr(>|t|)"]
+}
+```
+
+## 4a. 4a. For a given sample size and error, what does the distribution of p-values look like? 
+
+```{r}
+p2 <- ggplot(data=test.df2,aes(pval,group=n,col=n))
+
+p2+ geom_density()+facet_grid(~sd.err)+ xlab("p value")+ ylab("density")
+```
+## 4b. What proportion of p-values are <= 0.05?
+## I am not sure how to complete this step. 
+
+```{r}
+pvalues <- which(test.df2$p.val <=0.05)
+
+pvalues
+
+
+```
+## 4c. How do the p values change when the error values change. 
+
+```{r}
+p3 <- ggplot(data=test.df2, aes(pval,group=n,col=n))
+
+p3+ geom_density()+ facet_grid(~sd.err)
+```
+
