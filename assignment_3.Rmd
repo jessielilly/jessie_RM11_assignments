@@ -87,3 +87,55 @@ p <- ggplot(data=squirrel.df,aes(population,tl))
 p+geom_boxplot()
 ```
 
+## I am interested in whether there is a difference in the abundance of polychaete worms in Atlantic Sturgeon stomachs based on where they are captured in Minas Basin (Kingsport Beach, Blomidon Beach, and PorterWeir), and also whether total length(TL) effects this abundance. 
+
+## Data generation
+
+```{r}
+n.groups <- 3
+n.sample<- 300
+n<- n.groups*n.sample
+
+```
+
+## Create a population indicator
+```{r}
+x <- rep(1:n.groups, rep(n.sample, n.groups)) ## population indicator
+
+pop<- factor(x,labels= c("Kingsport","Blomidon","Porter"))
+
+length <- runif(n,150,300) ## total length
+
+length <- length-mean(length) ## center by subtracting the mean 
+```
+
+## Design a matrix - an interaction between length and population 
+## I am not sure what to choose for my beta.vec numbers. 
+
+```{r}
+Xmat <- model.matrix(~pop *length)
+
+beta.vec <- c(-4,1,2,6,2,-5)
+```
+
+## Assemble into a poisson model. 
+## Build the design of the matrix as an interactive combination of length and population.
+
+```{r}
+lin.pred <- Xmat[,] %*% beta.vec
+lambda <- exp(lin.pred) ## poisson mean
+C <- rpois (n=n,lambda=lambda) ## poisson noise
+```
+
+## Now assess the model. 
+## I am not sure what C~pop does? 
+```{r}
+m1 <- glm(C~pop*length,poisson)
+summary(m1)
+```
+## Test model 
+```{r}
+par(mfrow=c(2,2))
+plot(m1)
+```
+
