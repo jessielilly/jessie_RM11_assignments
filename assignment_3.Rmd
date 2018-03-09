@@ -1,0 +1,89 @@
+---
+title: "assignment_3"
+author: "Jessie Lilly"
+date: "March 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Tidyverse
+
+```{r}
+library(tidyverse)
+```
+
+## 1. Create your own Poisson Distibution
+
+## Detect whether the mean squirrel density differs between a 1km transect taken from 5 farmers field adjacent from the dikes in Wolfville, or a 5 1km forested transects sampled just north from Kentville. 
+
+## First we need an indicator for site use. 
+
+```{r}
+n.sites <- 5 ## 5 samples taken at each site.
+
+x <- gl(n=2,k=n.sites, labels = c("field","forest")) ## Indicator variable for sites.
+
+n <- 2*n.sites ##total number of sites.
+```
+
+
+## The mean squirrel density in the farmers fields is 3, and the mean squirrel denity ## forrested areas is 12. Then alpha= log(3)= 0.47712, and log(12) =alpha + beta. 
+## Beta= log(12)-log(3)= 
+## 0.60206
+## Therefore, the expected density lambdai is given by:
+```{r}
+lambda <- exp(0.47712+0.60206*(as.numeric(x)-1)) # x has levels 1 and 2 not,0 and 1
+```
+
+## Add noise that comes from a Poisson distribution and inspect the squirrel counts generated. 
+
+```{r}
+C <- rpois(n=n, lambda=lambda) ## add poisson noise
+```
+
+## Fit the poisson t test
+
+```{r}
+poisson.t.test <- glm(C~x,family=poisson) # Fit the model
+summary(poisson.t.test) # T test
+
+```
+
+
+2. 
+
+## Create a boxplot to compare squirrel tail length from the forest. 
+
+```{r}
+ngroups <- 5 ## number of groups of squirrels sampled in a forest near wolfville. 
+nsamples<- 25 ## 25 squirrels were sampled in each transect. 
+pop.means <- c(5,10,20,15,8)  ## mean tail length
+resid.sd <- 3 ## the residuals. 
+
+n <- ngroups * nsamples ## total number of data poinsts. 
+
+eps <- rnorm(n,0,resid.sd) ## residuals 
+
+x<- rep(pop.means,rep(nsample,ngroups)) ## Indicator for the population
+means <- rep(pop.means,rep(nsample,ngroups))
+
+X <- as.matrix (model.matrix(~as.factor(x)-1)) ## design matrix; no intercept! 
+
+y<- as.numeric(X %*% as.matrix(pop.means)+eps)
+
+squirrel.df <- data.frame(population=as.factor(x),tl=y)
+
+
+```
+
+## Create a boxplot of taillength versus sample group. 
+
+```{r}
+p <- ggplot(data=squirrel.df,aes(population,tl))
+
+p+geom_boxplot()
+```
+
