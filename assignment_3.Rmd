@@ -89,11 +89,13 @@ p+geom_boxplot()
 
 ## I am interested in whether there is a difference in the abundance of polychaete worms in Atlantic Sturgeon stomachs based on where they are captured in Minas Basin (Kingsport Beach, Blomidon Beach, and PorterWeir), and also whether total length(TL) effects this abundance. 
 
+## log(lambda)= alpha(king)+ B1*X1(Blom)+ B2*X2(Por)+B3*X(TL)+B4*X(TL)*X(Blom)+B4XTL*XPor
+
 ## Data generation
 
 ```{r}
 n.groups <- 3
-n.sample<- 300
+n.sample<- 100
 n<- n.groups*n.sample
 
 ```
@@ -104,7 +106,7 @@ x <- rep(1:n.groups, rep(n.sample, n.groups)) ## population indicator
 
 pop<- factor(x,labels= c("Kingsport","Blomidon","Porter"))
 
-length <- runif(n,150,300) ## total length
+length <- runif(n,25,150) ## total length
 
 length <- length-mean(length) ## center by subtracting the mean 
 ```
@@ -115,7 +117,7 @@ length <- length-mean(length) ## center by subtracting the mean
 ```{r}
 Xmat <- model.matrix(~pop *length)
 
-beta.vec <- c(-4,1,2,6,2,-5)
+beta.vec <- c(4,1,2,6,2,5)
 ```
 
 ## Assemble into a poisson model. 
@@ -134,6 +136,105 @@ m1 <- glm(C~pop*length,poisson)
 summary(m1)
 ```
 ## Test model 
+```{r}
+par(mfrow=c(2,2))
+plot(m1)
+```
+
+
+## Binomial Ancova
+
+## Are Female Atlantic Sturgeon more likely to enter Minas Basin during May then male Atlantic Sturgeon. 
+
+```{r}
+N<- 50 #total number of Atlantic Sturgeon sampled in May 2015
+p.fem <- 20/50 # Success probability of a female
+p.mal <- 30/50 # Success probability of a male 
+```
+
+## Add Binomial noise 
+
+```{r}
+C.fem <- rbinom(1,50,prob=p.fem)  
+C.mal <- rbinom (1,50,prob=p.mal)
+
+C<- c(C.fem,C.mal)
+sex <- factor(c(0,1),labels=c("Female","Male"))
+```
+
+## Binomial t-test in R suggets a significant difference in the percieved abundance of Male and female Atlantic Sturgeon entering Minas Basin during May. 
+
+```{r}
+summary(glm(cbind(C,N-C)~sex,family=binomial))
+
+
+```
+
+## What is the proportion of Atlantic Sturgeon detected at 3 recievers in Minas Basin when water temperatures are below 10 degrees celcius. 
+
+```{r}
+n.groups <- 3
+n.sample <- 20
+n <- n.groups*n.sample
+```
+
+```{r}
+x <- rep(1:n.groups,rep(n.sample,n.groups)) ## indicator for population
+pop <- factor(x,labels=c("Kingsport","Blomidon","Porter"))
+```
+
+## Construct a continous temperature index: 0 denotes sites less than 10 degrees celcius, and 1 is greater than 10 degrees celcius. 
+
+```{r}
+temperature.Kingsport <- sort(runif(n.sample,0,1))
+temperature.Blomidon <- sort(runif(n.sample,0,1))
+temperature.Porter <- sort(runif(n.sample,0,1))
+
+temperature <- c(temperature.Blomidon,temperature.Kingsport,temperature.Porter)
+```
+
+## Also need the number of Atlantic Sturgeon examined in each population Ni. 
+
+```{r}
+N <- round(runif(n,20,50)) # get discrete uniform values
+```
+
+## Build the design matrix. 
+
+```{r}
+Xmat <- model.matrix(~pop*temperature)
+print(Xmat,dig=2)
+```
+## Choose parameters 
+
+```{r}
+beta.vec <- c(5,1,3,7,3,4)
+```
+
+## Value of lin predictor matrix multiplication
+
+```{r}
+lin.pred <- Xmat[,] %*% beta.vec
+exp.p <- exp(lin.pred)/(1+exp(lin.pred)) ## expected proportion
+C<- rbinom(n=n,size=N,prob=exp.p)
+
+```
+
+## Expect what we created
+
+```{r}
+hist(C)
+```
+
+## Analyze
+
+```{r}
+m1 <- glm(cbind(C,N-C)~pop*temperature,binomial)
+summary(m1)
+
+```
+## Check model 
+
 ```{r}
 par(mfrow=c(2,2))
 plot(m1)
